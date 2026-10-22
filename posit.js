@@ -1,6 +1,6 @@
 "use strict";
 const sources=[
- {url:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Buffalo_Apartment_Fire_June25.07_pt3.jpg/1024px-Buffalo_Apartment_Fire_June25.07_pt3.jpg",page:"https://commons.wikimedia.org/wiki/File:Buffalo_Apartment_Fire_June25.07_pt3.jpg",credit:"DragonFire1024 · Wikimedia Commons · CC BY-SA 3.0"},
+ {url:"https://upload.wikimedia.org/wikipedia/commons/d/d0/Buffalo_Apartment_Fire_June25.07_pt3.jpg",page:"https://commons.wikimedia.org/wiki/File:Buffalo_Apartment_Fire_June25.07_pt3.jpg",credit:"DragonFire1024 · Wikimedia Commons · CC BY-SA 3.0"},
  {url:"https://upload.wikimedia.org/wikipedia/commons/3/34/Large_black_smoke_and_flames_shoot_from_fire1.JPG",page:"https://commons.wikimedia.org/wiki/File:Large_black_smoke_and_flames_shoot_from_fire1.JPG",credit:"AutisticPsycho · Wikimedia Commons · CC BY 2.5"},
  {url:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Liverpool_High_Rise_Fire.jpg/960px-Liverpool_High_Rise_Fire.jpg",page:"https://commons.wikimedia.org/wiki/File:Liverpool_High_Rise_Fire.jpg",credit:"Helitak430 · Wikimedia Commons · CC BY-SA 4.0"}
 ];
@@ -89,12 +89,30 @@ function load(i){
  $("correction").classList.remove("show");
  $("saveHint").textContent="As respostas são guardadas automaticamente neste navegador.";
 }
+const fallbacks=[
+ ["https://commons.wikimedia.org/wiki/Special:Redirect/file/Buffalo_Apartment_Fire_June25.07_pt3.jpg","https://commons.wikimedia.org/wiki/Special:FilePath/Buffalo_Apartment_Fire_June25.07_pt3.jpg"],
+ ["https://commons.wikimedia.org/wiki/Special:Redirect/file/Large_black_smoke_and_flames_shoot_from_fire1.JPG"],
+ ["https://commons.wikimedia.org/wiki/Special:Redirect/file/Liverpool_High_Rise_Fire.jpg"]
+];
+let imageFallbackIndex=0;
+function imageFailed(){
+ const c=fallbacks[current]||[];
+ if(imageFallbackIndex<c.length){
+  const next=c[imageFallbackIndex++];
+  $("mainPhoto").src=next;
+  $("caseButtons").querySelectorAll("img").forEach(img=>{
+   if(img.closest("[data-case]")?.dataset.case===String(current))img.src=next;
+  });
+ } else {
+  $("photoError").hidden=false;
+ }
+}
 function render(i){
  if(i===current&&$("scenarioTitle").textContent)save();
  current=i;const c=cases[i],photo=sources[i];
  $("scenarioTitle").textContent=c.name;
  $("caseLevel").textContent=c.level+" · Caso "+(i+1)+" de 3";
- $("mainPhoto").src=photo.url;
+ imageFallbackIndex=0;$("mainPhoto").src=photo.url;
  $("mainPhoto").alt="Fotografia real de incêndio estrutural: "+c.caption;
  $("photoCredit").textContent=photo.credit;
  $("photoCredit").href=photo.page;
@@ -108,7 +126,7 @@ function render(i){
 function buildTiles(){
  for(let i=0;i<cases.length;i++){
   const b=document.createElement("button");b.className="case-tile";b.type="button";b.dataset.case=String(i);b.setAttribute("aria-pressed","false");
-  const img=document.createElement("img");img.src=sources[i].url;img.alt="";img.loading="lazy";
+  const img=document.createElement("img");img.src=sources[i].url;img.alt="";img.loading="lazy";img.onerror=()=>{if(i===current&&$("mainPhoto").currentSrc)img.src=$("mainPhoto").src;else img.src=sources[i].page};
   const div=document.createElement("div");div.className="tile-info";
   const top=document.createElement("span");top.className="small";top.textContent=cases[i].level+" · Caso "+(i+1);
   const strong=document.createElement("strong");strong.textContent=cases[i].name;
@@ -179,5 +197,5 @@ $("evaluate").onclick=feedback;
 $("copy").onclick=async()=>{try{await navigator.clipboard.writeText(plainText());$("saveHint").textContent="✓ POSIT copiado."}catch(e){$("saveHint").textContent="A cópia foi bloqueada pelo navegador. Podes imprimir ou selecionar os dados."}};
 $("print").onclick=()=>window.print();
 $("reset").onclick=()=>{if(!confirm("Apagar apenas as respostas deste cenário?"))return;try{localStorage.removeItem(storageKey())}catch(e){}load(current)};
-$("mainPhoto").onerror=()=>{$("photoError").hidden=false};
+$("mainPhoto").onerror=imageFailed;
 render(0);
