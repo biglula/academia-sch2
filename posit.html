@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Treino de POSIT do SGO por fotografia, em incêndios estruturais, com autoavaliação e casos práticos.">
+<title>Treino POSIT por Imagem — Academia SCH2</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:#0b1422;color:#eaf2fa}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top left,#173454 0,#0b1422 54%);min-height:100vh}
+main{max-width:1100px;padding:22px 17px 60px;margin:auto}header{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:25px}
+a{color:#9fd4ff}header a{color:#e3effc;text-decoration:none;padding:12px 14px;border:1px solid #50627b;border-radius:12px}
+.logo{font-size:20px;font-weight:800}.logo span{background:#ed6d47;padding:9px;border-radius:12px;margin-right:8px}
+h1{font-size:clamp(29px,5vw,44px);margin:14px 0}h2{font-size:22px}p{line-height:1.6;color:#b4c5d8}
+.eyebrow{letter-spacing:2px;text-transform:uppercase;color:#ffae8a;font-size:12px;font-weight:800}
+.panel{background:#132237;border:1px solid #354b66;border-radius:20px;padding:23px;margin:19px 0;box-shadow:0 12px 35px #0002}
+.boxgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(275px,1fr);gap:18px}
+.photo{margin:0}.photo img{width:100%;height:clamp(270px,36vw,480px);object-fit:cover;display:block;border-radius:14px;background:#263a4e}
+.photo figcaption{font-size:12px;line-height:1.5;color:#aabbd0;padding-top:10px}
+.notice{background:#202e43;border:1px solid #586b7d;border-radius:13px;padding:13px 15px;font-size:14px;color:#dbe6f4;line-height:1.55}
+strong{color:#f5f8fd}label{font-size:13px;color:#c5d2e4;font-weight:700;display:block;margin-bottom:8px}
+select,textarea,input{font:inherit;color:#eef4ff;background:#0c192b;border:1px solid #466080;border-radius:11px;padding:12px;width:100%}
+textarea{min-height:132px;resize:vertical;line-height:1.5}textarea:focus,select:focus,input:focus{outline:2px solid #5aabda;outline-offset:1px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fbox{padding:16px;border:1px solid #35526d;background:#0e1c2d;border-radius:14px;margin:0 0 14px}
+.fbox h3{margin:0 0 6px;font-size:18px}
+.fbox p{font-size:12px;margin:0 0 12px}
+.muted{color:#9cafc4;font-size:13px}
+.data{white-space:pre-line;background:#0e1c2c;border:1px solid #405975;border-radius:13px;padding:15px;color:#dce8f7;line-height:1.65;font-size:14px}
+.chip{display:inline-flex;gap:6px;align-items:center;background:#34465e;border-radius:60px;padding:7px 11px;color:#ecf4ff;font-size:12px;font-weight:800;margin:0 7px 8px 0}
+.btn{border:0;border-radius:12px;background:#ff7750;color:#142033;padding:13px 20px;font:inherit;font-weight:800;cursor:pointer}
+.btn:hover{filter:brightness(1.1)}.btn.alt{background:#2a4363;color:#e4f0fa}.actions{display:flex;flex-wrap:wrap;gap:11px}
+.review{display:none}.review.visible{display:block}.answer{border-left:3px solid #5bbca0;padding:11px 14px;margin:12px 0;background:#102c34;border-radius:0 12px 12px 0}
+.answer h3{margin:0 0 7px;font-size:16px}.answer p{margin:0;color:#dfedf0;white-space:pre-line}
+.checklist{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px}
+.item{display:flex;gap:10px;padding:10px 12px;border:1px solid #405770;border-radius:10px;line-height:1.4;cursor:pointer;font-size:14px}
+.item input{width:18px;height:18px;accent-color:#64d3af;flex:none;margin:0}
+.score{font-size:20px;font-weight:800;color:#8ee4c8;margin-top:14px}
+.warning{color:#ffca9b}.hide{display:none}
+footer{font-size:12px;color:#91a5bc;line-height:1.55;padding:16px 0}
+@media(max-width:730px){.boxgrid,.fields,.checklist{grid-template-columns:1fr}.panel{padding:16px}.photo img{height:340px}}
+@media print{body{background:white;color:#121b26}main{max-width:none;padding:10px}.panel,.fbox{border:1px solid #aaa;background:white;box-shadow:none;color:#111}.data,.notice{color:#111;background:white}.btn,header a,#casePicker,.actions,.review:not(.visible){display:none!important}textarea,input{background:white;color:black;border:1px solid #777}.photo img{height:230px}p,.muted,.photo figcaption{color:#333}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="logo"><span>🚒</span>Academia SCH2</div><a href="index.html">← Voltar aos testes</a></header>
+<div class="eyebrow">SGO · Guia de Comando · Incêndios Estruturais</div>
+<h1>Treino de POSIT por imagem</h1>
+<p>Observa a fotografia, lê os dados fornecidos no enunciado e preenche o teu ponto de situação inicial como se estivesses a realizar um exercício de promoção a SCH2. Há três cenários com diferentes níveis de dificuldade.</p>
+<div class="notice"><strong>Regra essencial:</strong> escreve o que a imagem mostra, separa os riscos <em>possíveis</em> dos factos confirmados e não inventes vítimas, coordenadas, hidrantes, danos estruturais ou meios. Os locais e os dados dos exercícios são fictícios.</div>
+
+<section class="panel" id="casePicker">
+<label for="scenario">Escolhe o cenário</label>
+<select id="scenario">
+<option value="0">Cenário 1 · Fácil — Habitação com fogo à vista</option>
+<option value="1">Cenário 2 · Médio — Incêndio na cobertura</option>
+<option value="2">Cenário 3 · Difícil — Edifício de grande altura</option>
+</select>
+</section>
+
+<section class="panel">
+<div id="badge" class="chip">Fácil</div><div class="chip" id="number">Caso 1/3</div>
+<h2 id="caseTitle">Incêndio em habitação</h2>
+<div class="boxgrid">
+<figure class="photo">
+<img id="photo" alt="Fotografia de incêndio estrutural para interpretação do POSIT">
+<figcaption id="source"></figcaption>
+<p class="warning hide" id="imageError">Não foi possível carregar a fotografia. Usa a ligação de origem abaixo ou verifica a ligação à internet.</p>
+</figure>
+<div>
+<h3>Dados fornecidos no enunciado</h3>
+<div class="data" id="facts"></div>
+<p class="muted">Estes dados simulados completam a fotografia para permitir praticar o campo ESTOU. Os dados que não são indicados não devem ser inventados.</p>
+<div class="notice" id="challenge"></div>
+</div>
+</div>
+</section>
+
+<section class="panel" id="form">
+<h2>Preenche o POSIT</h2>
+<p>O guia de referência inclui <strong>hora, número de ocorrência, canal de manobra</strong> e os campos <strong>ESTOU, VEJO, FAÇO e PEÇO</strong>. Aqui praticas a formulação em texto; no exame poderás ter uma folha com caixas para assinalar.</p>
+<div class="fields">
+<div class="fbox"><h3>1. ESTOU</h3><p>Local, freguesia, município, hora e outras identificações fornecidas.</p><textarea id="estou" placeholder="Ex.: Estou em... Às... Ocorrência n.º... Canal..."></textarea></div>
+<div class="fbox"><h3>2. VEJO</h3><p>Estado do incêndio, fogo à vista, ocupação, tipo de edifício, propagação e pontos sensíveis — apenas o que é observável.</p><textarea id="vejo" placeholder="Ex.: Incêndio ativo, com fogo à vista..."></textarea></div>
+<div class="fbox"><h3>3. FAÇO</h3><p>Reconhecimento, salvamentos, meios de ação, proteção de exposições e estratégia a avaliar. Distingue ações iniciadas das propostas.</p><textarea id="faco" placeholder="Ex.: Efetuo reconhecimento a 360°..."></textarea></div>
+<div class="fbox"><h3>4. PEÇO</h3><p>Pedidos de reforço e respetivas quantidades. Justifica quando o dimensionamento depende do reconhecimento.</p><textarea id="peco" placeholder="Ex.: Solicito um VE para reconhecimento e acesso..."></textarea></div>
+</div>
+<div class="fbox"><h3>A confirmar no reconhecimento</h3><p>Dados importantes que a fotografia não permite garantir.</p><textarea id="confirmar" placeholder="Ex.: Presença de vítimas, estabilidade estrutural, acessos interiores e disponibilidade de hidrantes..."></textarea></div>
+<div class="actions">
+<button class="btn" id="evaluate">Ver proposta de correção</button>
+<button class="btn alt" id="copy">Copiar o meu POSIT</button>
+<button class="btn alt" id="print">Imprimir</button>
+<button class="btn alt" id="reset">Limpar respostas</button>
+</div>
+<p class="muted" id="saveState">O rascunho é guardado automaticamente neste navegador.</p>
+</section>
+
+<section class="panel review" id="review" aria-live="polite">
+<h2>Proposta de correção — cenário <span id="reviewNum">1</span></h2>
+<div class="notice">Esta é uma <strong>proposta de preenchimento para estudo</strong>, não um POSIT operacional. O exame pode aceitar formulações diferentes. Não há correção automática de texto livre: compara as tuas respostas e assinala os critérios que cumpriste.</div>
+<div id="model"></div>
+<h3>Autoavaliação</h3>
+<div id="checks" class="checklist"></div>
+<div class="score" id="score">0 de 8 critérios</div>
+<p class="muted">Não é uma nota oficial. Serve para praticares a organização e a prudência na interpretação da imagem.</p>
+</section>
+
+<div class="panel"><h2>Fontes e método de estudo</h2><p>Exercícios inspirados nos campos do <a href="https://prociv.gov.pt/media/qcuhirlz/sgo_ferramentas.pdf" target="_blank" rel="noopener noreferrer">Guia de Comando em Incêndios Estruturais — ANEPC (SGO, página 9 do PDF)</a>. Também podes consultar o <a href="https://www.guias.bombeiros.pt/guiaIU.php" target="_blank" rel="noopener noreferrer">formulário digital de referência</a>. Este treino não substitui o guia oficial ou procedimentos em vigor.</p></div>
+<footer>Academia SCH2 · Os exercícios e localizações são fictícios. As fotografias externas são utilizadas apenas como referência visual, com ligação e crédito para a origem. Respostas guardadas localmente no dispositivo; sem envio para servidores.</footer>
+</main>
+<script>
+(function(){
+"use strict";
+const cases=[
+{
+title:"Incêndio em edifício de habitação — chamas visíveis",
+level:"Fácil",
+photo:"https://images.pexels.com/photos/14776525/pexels-photo-14776525.jpeg?auto=compress&cs=tinysrgb&w=1200",
+credit:"Fotografia: Quang Nguyen Vinh / Pexels, referência visual de incêndio em edifício.",
+link:"https://www.pexels.com/photo/firefighters-during-fire-of-apartment-building-14776525/",
+facts:"Hora do primeiro POSIT: 16h32\nOcorrência n.º: EX-101 (fictícia)\nLocal: Rua das Oliveiras, n.º 15\nFreguesia: Santa Clara (fictícia)\nMunicípio: Vale Claro (fictício)\nCanal de manobra: MAN 1\nMeios comunicados: 1 VUCI no local.\nVítimas: sem informação confirmada.",
+challenge:"<strong>Objetivo:</strong> identifica o incêndio ativo e o fogo à vista; distingue a propagação observável do risco potencial de progressão vertical. Não afirmes que não há vítimas.",
+model:[
+["ESTOU","Estou na Rua das Oliveiras, n.º 15, freguesia de Santa Clara, município de Vale Claro. Primeiro POSIT às 16h32, ocorrência EX-101, canal MAN 1. (Dados fictícios do exercício.)"],
+["VEJO","Incêndio em edifício habitacional, em curso, com fogo à vista e fumo na fachada em pisos acima do rés do chão. Há potencial de propagação vertical e ameaça a outras habitações, a confirmar no reconhecimento. Não é possível confirmar vítimas, hidrantes ou estabilidade estrutural pela imagem."],
+["FAÇO","Inicio/continuo reconhecimento completo, incluindo fachada tardoz se possível; verifico ocupantes e necessidades de salvamento; organizo zona de segurança e linhas de água, protegendo exposições. Avalio condições para estratégia ofensiva; não a considero executada só por observar a fotografia."],
+["PEÇO","Quantifico reforços após avaliação inicial. Um veículo escada (VE), por exemplo, pode ser solicitado se o acesso a pisos elevados e/ou salvamento o justificar; reforço de combate e ambulâncias dependem de vítimas, edifício e meios. Evito solicitar números arbitrários sem avaliação."],
+["A confirmar","Vítimas/ocupantes, piso e compartimento de origem, vias de evacuação, progressão interior, estabilidade da fachada, hidrantes, caudais e meios efetivamente empenhados."]
+],
+criteria:["Registei corretamente local e hora fornecidos.","Indiquei edifício habitacional e incêndio em curso.","Identifiquei fumo e fogo à vista.","Distingui risco de propagação de propagação confirmada.","Incluí reconhecimento e pesquisa de vítimas.","Incluí proteção de exposições e avaliação da estratégia.","Formulei PEÇO sem inventar recursos confirmados.","Assinalei claramente dados que ainda precisam de confirmação."]
+},
+{
+title:"Incêndio em cobertura — acessos e risco estrutural",
+level:"Médio",
+photo:"https://norwichct.gov/PhotoGallery/2/DSC_0063.jpg",
+credit:"Fotografia: Norwich Fire Department (EUA), incêndio em cobertura; usada como referência visual.",
+link:"https://norwichct.gov/gallery.aspx?AID=2",
+facts:"Hora do primeiro POSIT: 09h44\nOcorrência n.º: EX-102 (fictícia)\nLocal: Estrada do Pinhal, n.º 8\nFreguesia: Santa Luzia (fictícia)\nMunicípio: Serra Nova (fictício)\nCanal de manobra: MAN 2\nMeios comunicados: 1 VUCI e 1 VE.\nVítimas: não apuradas.",
+challenge:"<strong>Objetivo:</strong> identifica o foco visível na cobertura, verifica o risco de progressão e propõe prioridades de segurança. Não infiras a resistência da estrutura a partir do aspeto exterior.",
+model:[
+["ESTOU","Estou na Estrada do Pinhal, n.º 8, freguesia de Santa Luzia, município de Serra Nova. Primeiro POSIT às 09h44, ocorrência EX-102, canal MAN 2. Dados fornecidos, fictícios."],
+["VEJO","Incêndio estrutural em curso, com fumo denso e fogo à vista na zona de cobertura de uma habitação. A cobertura e espaços interiores podem estar afetados. É necessário confirmar o tipo construtivo, o risco de colapso, a extensão interior e os edifícios expostos."],
+["FAÇO","Efetuo reconhecimento e controlo de acessos; procuro vítimas e avalio vias de salvamento; estabeleço proteção de exposições e meios hidráulicos. Avalio a integridade da cobertura e limito o acesso a zonas com risco de colapso. Seleciono estratégia ofensiva ou defensiva após reconhecer a estabilidade e as condições de segurança."],
+["PEÇO","Confirmo se VUCI e VE são suficientes, disponibilidade de água e necessidade de reforço. Se insuficientes, peço o número de VUCI/VTT, equipas ou ambulâncias fundamentado no levantamento. A existência de 1 VE já comunicado não obriga automaticamente a pedir outro."],
+["A confirmar","Vítimas, propagação ao sótão/interior, resistência da cobertura, acessos, hidrantes, vento, efeito sobre edifícios próximos e segurança da operação na escada."]
+],
+criteria:["Indiquei corretamente os dados de ESTOU.","Identifiquei o fogo à vista e fumo na cobertura.","Evitei garantir que todo o incêndio está limitado ao telhado.","Considerei estabilidade e risco de colapso.","Previ reconhecimento e busca/salvamento conforme necessidade.","Previ proteção de exposições e abastecimento.","Considerei os meios já presentes antes de pedir outros.","Registei o que depende de confirmação."]
+},
+{
+title:"Edifício de grande altura — gestão de prioridades",
+level:"Difícil",
+photo:"https://images.pexels.com/photos/14776560/pexels-photo-14776560.jpeg?auto=compress&cs=tinysrgb&w=1200",
+credit:"Fotografia: Quang Nguyen Vinh / Pexels, intervenção em edifício urbano de grande altura.",
+link:"https://www.pexels.com/photo/firefighters-extinguishing-a-fire-of-a-building-in-city-14776560/",
+facts:"Hora do primeiro POSIT: 21h08\nOcorrência n.º: EX-103 (fictícia)\nLocal: Avenida da Estação, n.º 120\nFreguesia: São Vicente (fictícia)\nMunicípio: Porto Alto (fictício)\nCanal de manobra: MAN 3\nMeios comunicados: 1 VUCI e 1 VE.\nOcupantes e estado das caixas de escada: desconhecidos.",
+challenge:"<strong>Objetivo:</strong> organiza prioridades perante um incêndio em edifício alto; distingue o que a fotografia mostra de inferências sobre propagação, vítimas, rotas de evacuação e estratégia. Justifica reforços sem apresentar contagens como certezas.",
+model:[
+["ESTOU","Estou na Avenida da Estação, n.º 120, freguesia de São Vicente, município de Porto Alto. Primeiro POSIT às 21h08, ocorrência EX-103, canal MAN 3. Localização fictícia."],
+["VEJO","Incêndio estrutural em curso em edifício de habitação de vários pisos/altura elevada; fumo visível em pisos superiores e mobilização de meios. A existência de chama à vista só deve ser assinalada se se distinguir inequivocamente na fotografia usada. A propagação interior e pelos espaços verticais é possibilidade a reconhecer, não confirmação. Pontos sensíveis: outras habitações e ocupantes."],
+["FAÇO","Determino reconhecimento a 360° e avaliação interior; prioridade à localização de ocupantes e vias de evacuação, com atenção às caixas de escada e propagação de fumos. Estabeleço zonas de segurança, coordeno linhas de água e proteção de exposições; avalio necessidade de comando setorizado, abastecimento e acesso vertical. Defino ofensiva ou defensiva segundo o risco reconhecido, sem assumir condições estruturais invisíveis."],
+["PEÇO","Peço/confirmo meios adicionais adequados ao número de pisos, acesso, água, salvamentos e vítimas: eventualmente VUCI/VECI, VE/VP, VTT, ABSC, VMER e elemento de comando, mas quantidades são decisão a fundamentar no reconhecimento. Não considero automaticamente os reforços já disponíveis."],
+["A confirmar","Número de ocupantes e vítimas; piso de origem, compartimentos e rotas interiores; estado das caixas de escada e elevadores; compartimentação e sistemas do edifício; mananciais e caudal; estabilidade, vento e necessidades de reforço."]
+],
+criteria:["Preenchi ESTOU apenas com os dados fornecidos.","Identifiquei incêndio estrutural em edifício de altura elevada.","Separei o que se vê de propagação apenas possível.","Não inventei vítimas, hidrantes nem condições de escadas.","Priorizei reconhecimento, ocupantes e vias de evacuação.","Considerei segurança, exposições e estratégia condicionada.","Justifiquei eventuais reforços, sem quantidades arbitrárias.","Listei aspetos críticos a confirmar."]
+}
+];
+const ids=["estou","vejo","faco","peco","confirmar"];
+const $=id=>document.getElementById(id);
+let current=0;
+function key(i){return "sch2_posit_case_v1_"+i}
+function save(){try{localStorage.setItem(key(current),JSON.stringify(Object.fromEntries(ids.map(id=>[id,$(id).value]))));$("saveState").textContent="Rascunho guardado neste dispositivo."}catch(e){$("saveState").textContent="O navegador não permitiu guardar automaticamente."}}
+function restore(i){let d={};try{d=JSON.parse(localStorage.getItem(key(i))||"{}")||{}}catch(e){}ids.forEach(id=>{$(id).value=d[id]||""})}
+function render(i){current=i;const c=cases[i];$("scenario").value=String(i);$("caseTitle").textContent=c.title;$("badge").textContent=c.level;$("number").textContent="Caso "+(i+1)+"/3";$("photo").src=c.photo;$("photo").alt="Fotografia de treino: "+c.title;$("imageError").classList.add("hide");$("source").innerHTML="Imagem de referência: <a href='"+c.link+"' target='_blank' rel='noopener noreferrer'>ver fotografia original e créditos</a>. "+c.credit;$("facts").textContent=c.facts;$("challenge").innerHTML=c.challenge;restore(i);$("review").classList.remove("visible");$("reviewNum").textContent=String(i+1);$("model").innerHTML="";$("checks").innerHTML="";$("score").textContent="0 de 8 critérios";}
+$("scenario").addEventListener("change",e=>{save();render(Number(e.target.value))});
+ids.forEach(id=>$(id).addEventListener("input",save));
+$("photo").addEventListener("error",()=>{$("imageError").classList.remove("hide")});
+$("evaluate").addEventListener("click",()=>{save();const c=cases[current],model=$("model"),checks=$("checks");model.innerHTML="";checks.innerHTML="";for(const pair of c.model){const el=document.createElement("div");el.className="answer";const h=document.createElement("h3");h.textContent=pair[0];const p=document.createElement("p");p.textContent=pair[1];el.append(h,p);model.appendChild(el)}c.criteria.forEach((criterion,i)=>{const label=document.createElement("label");label.className="item";label.style.marginBottom="0";const ch=document.createElement("input");ch.type="checkbox";ch.dataset.index=String(i);const span=document.createElement("span");span.textContent=criterion;label.append(ch,span);checks.appendChild(label)});function score(){const checked=checks.querySelectorAll("input:checked").length;$("score").textContent=checked+" de "+c.criteria.length+" critérios (autoavaliação)"}checks.addEventListener("change",score,{once:false});$("review").classList.add("visible");$("review").scrollIntoView({behavior:"smooth",block:"start"})});
+$("copy").addEventListener("click",async()=>{const c=cases[current];const txt=["ACADEMIA SCH2 — POSIT (exercício fictício)",c.title,...ids.map(id=>id.toUpperCase()+":\n"+($(id).value||"(não preenchido)"))].join("\n\n");try{await navigator.clipboard.writeText(txt);$("saveState").textContent="POSIT copiado para a área de transferência."}catch(e){$("saveState").textContent="Não foi possível copiar neste navegador. Podes selecionar o texto e copiar manualmente."}});
+$("print").addEventListener("click",()=>window.print());
+$("reset").addEventListener("click",()=>{if(!window.confirm("Limpar as respostas deste cenário?"))return;ids.forEach(id=>$(id).value="");save();$("review").classList.remove("visible")});
+render(0);
+})();
+</script>
+</body>
+</html>
