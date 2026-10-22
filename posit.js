@@ -126,7 +126,7 @@ function render(i){
 function buildTiles(){
  for(let i=0;i<cases.length;i++){
   const b=document.createElement("button");b.className="case-tile";b.type="button";b.dataset.case=String(i);b.setAttribute("aria-pressed","false");
-  const img=document.createElement("img");img.src=sources[i].url;img.alt="";img.loading="lazy";img.onerror=()=>{if(i===current&&$("mainPhoto").currentSrc)img.src=$("mainPhoto").src;else img.src=sources[i].page};
+  const img=document.createElement("img");img.src=sources[i].url;img.alt="";img.loading="lazy";img.onerror=()=>{const alt=i===current?$("mainPhoto").src:"";if(alt&&img.src!==alt){img.src=alt}else{img.onerror=null;img.style.opacity=".35";img.alt="Miniatura indisponível";}};
   const div=document.createElement("div");div.className="tile-info";
   const top=document.createElement("span");top.className="small";top.textContent=cases[i].level+" · Caso "+(i+1);
   const strong=document.createElement("strong");strong.textContent=cases[i].name;
