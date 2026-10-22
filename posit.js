@@ -30,7 +30,7 @@ info:"Confirmar piso/compartimento de origem, acessos interiores, vias de evacua
 const $=id=>document.getElementById(id);
 const appForm=$("formSheet"),canvas=$("sitac"),ctx=canvas.getContext("2d");
 let current=0,drawing=false,activePointer=null,pen="#17253b",penWidth=3,undoFrames=[];
-const textIds=["hora","ocorr","canal","local","coordN","coordW","freguesia","municipio","emOutro","tipoOutro","hidOutro","pontosOutro","pedidoOutro","pedidoOutroNome","cosNome","info","p2hora","p2nota","p3hora","p3nota","p4hora","p4nota","handoverHora","handoverPara"];
+
 const options=[
  ["estado","Estado do incêndio","radio",["Ativo (Curso)","Rescaldo (Conclusão)","Dominado (Resolução)","Extinto (Finalizado)"],"estado","red"],
  ["fogo","Com","radio",["Fogo à vista","Sem fogo à vista"],"fogo","grey"],
@@ -42,7 +42,7 @@ const options=[
  ["faco","Faço","checkbox",["Reconhecimento","Salvamentos","Estb. Meios de Ação","Proteção às exposições","Estratégia Ofensiva","Estratégia Defensiva","Rescaldo","Vigilância"],"faco","navy"]
 ];
 const pedidos=["VUCI/VECI","VMER","VTT","SMPC","VE/VP","Elemento de Comando","ABSC/ABTD/ABTM","Outro"];
-const oldEmOpts=new Set();
+
 function initOptions(){
 for(const [name,title,type,values,id,color] of options){
  const host=$(id+"Options");
@@ -60,7 +60,7 @@ const container=$("requestRows");for(const p of pedidos){
  row.append(input,label);container.append(row);
 }
 }
-function createMeansRows(n){const target=$("meiosRows");target.innerHTML="";for(let i=0;i<n;i++){let tr=document.createElement("tr");for(const key of ["meio","entidade","hora","missao"]){let td=document.createElement("td");let input=document.createElement("input");input.id="m_"+i+"_"+key;input.name=input.id;input.placeholder=key==="hora"?"HH:MM":"";input.setAttribute("aria-label","Meio "+(i+1)+" "+key);td.append(input);tr.append(td)}target.append(tr)}}
+function createMeansRows(n){const target=$("meiosRows");const previous=[...target.querySelectorAll('tr')].map(tr=>[...tr.querySelectorAll('input')].map(x=>x.value));target.innerHTML="";for(let i=0;i<n;i++){let tr=document.createElement("tr");for(const key of ["meio","entidade","hora","missao"]){let td=document.createElement("td");let input=document.createElement("input");input.id="m_"+i+"_"+key;input.name=input.id;input.placeholder=key==="hora"?"HH:MM":"";input.setAttribute("aria-label","Meio "+(i+1)+" "+key);if(previous[i]&&previous[i][['meio','entidade','hora','missao'].indexOf(key)])input.value=previous[i][['meio','entidade','hora','missao'].indexOf(key)];td.append(input);tr.append(td)}target.append(tr)}}
 function selected(name){return [...appForm.querySelectorAll('input[name="'+name+'"]:checked')].map(x=>x.value)}
 function has(name,val){return selected(name).includes(val)}
 function makeShot(){try{return canvas.toDataURL("image/png")}catch(e){return ""}}
@@ -74,7 +74,7 @@ function grab(){
 function storageKey(){return "academiasch2_sgo_guiacmd_v2_"+current}
 function save(){try{localStorage.setItem(storageKey(),JSON.stringify(grab()));$("saveHint").textContent="✓ Rascunho deste cenário guardado no dispositivo."}catch(e){$("saveHint").textContent="O navegador não permitiu guardar o rascunho."}}
 function clearCanvas(){ctx.clearRect(0,0,canvas.width,canvas.height);}
-function restoreShot(data){clearCanvas();if(!data)return;const img=new Image();img.onload=()=>{ctx.drawImage(img,0,0,canvas.width,canvas.height)};img.src=data}
+function restoreShot(data,shouldSave=false){clearCanvas();if(!data){if(shouldSave)save();return}const img=new Image();img.onload=()=>{ctx.drawImage(img,0,0,canvas.width,canvas.height);if(shouldSave)save()};img.src=data}
 function load(i){
  appForm.reset();createMeansRows(6);clearCanvas();undoFrames=[];let record={};
  try{record=JSON.parse(localStorage.getItem("academiasch2_sgo_guiacmd_v2_"+i)||"{}")||{}}catch(e){}
@@ -169,7 +169,7 @@ function setupCanvas(){
  const end=(ev)=>{if(!drawing||activePointer!==ev.pointerId)return;drawing=false;activePointer=null;ctx.closePath();save()};
  canvas.addEventListener("pointerup",end);canvas.addEventListener("pointercancel",end);
  document.querySelectorAll(".tool[data-pen]").forEach(b=>b.onclick=()=>{pen=b.dataset.pen;penWidth=pen==="#ffffff"?26:3;document.querySelectorAll(".tool[data-pen]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"))});
- $("undo").onclick=()=>{const last=undoFrames.pop();if(last)restoreShot(last);save()};
+ $("undo").onclick=()=>{const last=undoFrames.pop();if(last)restoreShot(last,true)};
  $("clearSitac").onclick=()=>{undoFrames.push(makeShot());clearCanvas();save()};
 }
 initOptions();buildTiles();setupCanvas();createMeansRows(6);
