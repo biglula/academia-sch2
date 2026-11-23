@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Matéria de Estudo — Academia SCH2</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#eaf0fa;background:#0a1120}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top left,#1a3050,#0a1120 52%);min-height:100vh}
+main{max-width:1050px;margin:auto;padding:22px 16px 55px}a{color:#9cceff}header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}h1{font-size:clamp(26px,5vw,44px);margin:26px 0 10px}h2{font-size:20px}p{color:#b4c3d6;line-height:1.6}
+.panel{background:#121f33;border:1px solid #30405a;border-radius:18px;padding:22px;margin:18px 0}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:13px}label{display:block;color:#bdcce0;font-size:13px;margin-bottom:6px}
+select,input{width:100%;font:inherit;background:#0b1628;color:white;border:1px solid #485b76;padding:12px;border-radius:10px}
+button,.nav{background:#ff704b;border:0;border-radius:12px;padding:11px 16px;color:#162033;font-weight:800;text-decoration:none;cursor:pointer;font:inherit}
+.nav{background:#273a55;color:#eaf0fa;display:inline-block}
+.muted{color:#a8b8ce;font-size:13px}.outline{border:1px solid #344a64;border-radius:13px;padding:16px;margin:12px 0;background:#0d1a2d}
+summary{cursor:pointer;font-weight:700;line-height:1.45}summary::marker{color:#ff9979}
+.answer{color:#6be5b0;font-weight:700;margin:12px 0 4px}.reference{color:#a6bdd9;font-size:12px}
+.tag{font-size:12px;color:#ffad98;font-weight:700;letter-spacing:.05em}#groups h3{color:#dce8f6;margin:28px 0 8px}
+#pdfview{width:100%;height:70vh;border:1px solid #455873;border-radius:12px;background:#fff}
+.hidden{display:none}#empty{display:none}.note{border-left:3px solid #ed9c65;padding-left:12px}
+@media(max-width:640px){.controls{grid-template-columns:1fr}.panel{padding:15px}#pdfview{height:62vh}}
+</style></head><body><main>
+<header><span style="font-size:28px">🚒</span><b>Academia SCH2</b><a class="nav" href="index.html">Voltar aos testes</a></header>
+<h1>Matéria de Estudo</h1>
+<p>Consulta os apontamentos organizados por matéria e subtema, com referências às páginas dos cadernos. São fichas de revisão baseadas no banco de perguntas — não substituem os manuais completos.</p>
+<section class="panel">
+<h2>Consultar apontamentos</h2>
+<div class="controls">
+<div><label for="topic">Escolher matéria</label><select id="topic"><option value="all">Todas as matérias</option><option value="veiculos">Incêndios em Veículos</option><option value="ventilacao">Ventilação Operacional</option><option value="rurais">Incêndios Rurais e Florestais</option><option value="combate">Incêndios Urbanos</option><option value="sgo">Sistema de Gestão de Operações (até página 22)</option><option value="hidraulico">Manobras — Material Hidráulico (até página 94)</option><option value="relatorios">Elaboração de Relatórios (todo o caderno)</option></select></div>
+<div><label for="search">Pesquisar assunto</label><input id="search" type="search" placeholder="Ex.: comando, mangueiras, ventilação"></div>
+</div>
+<p class="muted" id="counter" role="status">A carregar...</p>
+<div id="groups"></div><p id="empty" class="muted">Nenhum apontamento encontrado. Experimenta outra pesquisa.</p>
+</section>
+<section class="panel">
+<h2>Abre o teu manual PDF aqui</h2>
+<p>Se tiveres os cadernos guardados no telemóvel ou computador, podes selecionar um PDF e lê-lo nesta página. <strong>O ficheiro não é enviado ao GitHub nem a nenhum servidor</strong>: é aberto localmente pelo navegador.</p>
+<label for="pdfinput">Selecionar um PDF do dispositivo</label>
+<input id="pdfinput" type="file" accept="application/pdf,.pdf">
+<p class="muted" id="pdfstatus">Nenhum documento selecionado.</p>
+<iframe id="pdfview" class="hidden" title="Leitor de manual PDF"></iframe>
+<p class="muted">Alguns navegadores não mostram PDFs dentro da página. Nesse caso utiliza a opção “Abrir PDF” que aparecerá após a seleção.</p><p><a id="pdfopen" class="nav hidden" target="_blank" rel="noopener">Abrir PDF</a></p>
+</section>
+<p class="muted note">Os apontamentos são material de apoio ao estudo, elaborados a partir das perguntas e respetivas explicações. Para procedimentos operacionais, confirma sempre o conteúdo e a edição do manual da formação.</p>
+</main>
+<script src="banco-veiculos.js"></script><script src="banco-ventilacao.js"></script><script src="banco-rurais.js"></script><script src="banco-urbanos.js"></script><script src="banco-exame-final.js"></script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);
+const labels={veiculos:'Incêndios em Veículos',ventilacao:'Ventilação Operacional',rurais:'Incêndios Rurais e Florestais',combate:'Incêndios Urbanos',sgo:'Sistema de Gestão de Operações',hidraulico:'Material Hidráulico',relatorios:'Elaboração de Relatórios'};
+const banks=[window.SCH2_VEICULOS,window.SCH2_VENTILACAO,window.SCH2_RURAIS,window.SCH2_URBANOS,window.SCH2_FINAIS];
+const all=banks.filter(Array.isArray).flat().filter(q=>Array.isArray(q)&&q[1]==='mc'&&q[8]&&q[3]&&q[5]);
+const escapeHtml=str=>String(str||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function render(){
+const topic=$('topic').value,search=$('search').value.toLocaleLowerCase('pt-PT').trim();
+const rows=all.filter(q=>(topic==='all'||q[0]===topic)&&(!search||[q[2],q[3],q[5],q[7],q[8],labels[q[0]]].join(' ').toLocaleLowerCase('pt-PT').includes(search)));
+const groups={};for(const q of rows){const key=q[0]+'\u0000'+q[8];(groups[key]??=[]).push(q)}
+$('groups').replaceChildren();
+for(const [key,items] of Object.entries(groups)){
+ const [code,sub]=key.split('\u0000'),section=document.createElement('section'),h=document.createElement('h3');h.textContent=(labels[code]||code)+' — '+sub;section.append(h);
+ for(const q of items){const d=document.createElement('details');d.className='outline';const summary=document.createElement('summary');summary.textContent=q[2];
+ const ans=document.createElement('p');ans.className='answer';ans.textContent='Resposta-chave: '+q[3];
+ const body=document.createElement('p');body.textContent=q[5];const ref=document.createElement('p');ref.className='reference';ref.textContent='Fonte: '+(q[7]||'Caderno pedagógico SCH2');d.append(summary,ans,body,ref);section.append(d)}
+ $('groups').append(section)}
+$('counter').textContent=rows.length+' fichas de revisão em '+Object.keys(groups).length+' subtemas.';
+$('empty').style.display=rows.length?'none':'block';
+}
+$('topic').addEventListener('change',render);$('search').addEventListener('input',render);render();
+let priorUrl;
+$('pdfinput').addEventListener('change',()=>{
+ const f=$('pdfinput').files&&$('pdfinput').files[0];if(priorUrl)URL.revokeObjectURL(priorUrl);
+ if(!f){$('pdfview').classList.add('hidden');$('pdfopen').classList.add('hidden');$('pdfstatus').textContent='Nenhum documento selecionado.';return}
+ if(!(f.type==='application/pdf'||/\.pdf$/i.test(f.name))){$('pdfstatus').textContent='Seleciona um ficheiro PDF válido.';return}
+ priorUrl=URL.createObjectURL(f);$('pdfview').src=priorUrl;$('pdfview').classList.remove('hidden');$('pdfopen').href=priorUrl;$('pdfopen').classList.remove('hidden');$('pdfstatus').textContent='Documento aberto: '+f.name;
+});
+})();
+</script></body></html>
