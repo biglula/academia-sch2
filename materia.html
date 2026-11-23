@@ -21,6 +21,16 @@ summary{cursor:pointer;font-weight:700;line-height:1.45}summary::marker{color:#f
 <header><span style="font-size:28px">🚒</span><b>Academia SCH2</b><a class="nav" href="index.html">Voltar aos testes</a></header>
 <h1>Matéria de Estudo</h1>
 <p>Consulta os apontamentos organizados por matéria e subtema, com referências às páginas dos cadernos. São fichas de revisão baseadas no banco de perguntas — não substituem os manuais completos.</p>
+<section class="panel hidden" id="specific-review" style="border-color:#4a819b">
+<div class="tag">REVISÃO DE RESPOSTA</div>
+<h2 id="review-title">Pergunta a rever</h2>
+<p id="review-question" style="color:#edf4ff;font-weight:650"></p>
+<p class="answer" id="review-answer"></p>
+<p id="review-explanation"></p>
+<p class="reference" id="review-source"></p>
+<p class="note muted" id="review-page"></p>
+<a class="nav" href="#pdf-section">Selecionar o manual PDF para consultar a página indicada</a>
+</section>
 <section class="panel">
 <h2>Consultar apontamentos</h2>
 <div class="controls">
@@ -30,7 +40,7 @@ summary{cursor:pointer;font-weight:700;line-height:1.45}summary::marker{color:#f
 <p class="muted" id="counter" role="status">A carregar...</p>
 <div id="groups"></div><p id="empty" class="muted">Nenhum apontamento encontrado. Experimenta outra pesquisa.</p>
 </section>
-<section class="panel">
+<section class="panel" id="pdf-section">
 <h2>Abre o teu manual PDF aqui</h2>
 <p>Se tiveres os cadernos guardados no telemóvel ou computador, podes selecionar um PDF e lê-lo nesta página. <strong>O ficheiro não é enviado ao GitHub nem a nenhum servidor</strong>: é aberto localmente pelo navegador.</p>
 <label for="pdfinput">Selecionar um PDF do dispositivo</label>
@@ -47,6 +57,20 @@ summary{cursor:pointer;font-weight:700;line-height:1.45}summary::marker{color:#f
 const $=id=>document.getElementById(id);
 const labels={veiculos:'Incêndios em Veículos',ventilacao:'Ventilação Operacional',rurais:'Incêndios Rurais e Florestais',combate:'Incêndios Urbanos',sgo:'Sistema de Gestão de Operações',hidraulico:'Material Hidráulico',relatorios:'Elaboração de Relatórios'};
 const banks=[window.SCH2_VEICULOS,window.SCH2_VENTILACAO,window.SCH2_RURAIS,window.SCH2_URBANOS,window.SCH2_FINAIS];
+const linkParams=new URLSearchParams(location.search);
+const linkedTopic=linkParams.get('topic')||'';
+const linkedPage=Number(linkParams.get('page'));
+const validPage=Number.isInteger(linkedPage)&&linkedPage>0&&linkedPage<1000;
+if(linkedTopic && Array.from($('topic').options).some(o=>o.value===linkedTopic)) $('topic').value=linkedTopic;
+if(linkParams.has('question')){
+ $('specific-review').classList.remove('hidden');
+ $('review-title').textContent='Revisão — '+(labels[linkedTopic]||'Matéria de estudo');
+ $('review-question').textContent=linkParams.get('question')||'';
+ $('review-answer').textContent='Resposta correta: '+(linkParams.get('answer')||'');
+ $('review-explanation').textContent=linkParams.get('explain')||'';
+ $('review-source').textContent='Referência: '+(linkParams.get('source')||'Caderno pedagógico SCH2; página não identificada');
+ $('review-page').textContent=validPage?'Página indicada pelo banco: '+linkedPage+'. Seleciona o PDF deste manual para tentar abrir diretamente essa página. A numeração impressa pode diferir da numeração física do PDF.':'Esta pergunta não tem uma página específica registada. Consulta o tema e a explicação acima.';
+}
 const all=banks.filter(Array.isArray).flat().filter(q=>Array.isArray(q)&&q[1]==='mc'&&q[8]&&q[3]&&q[5]);
 const escapeHtml=str=>String(str||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function render(){
@@ -69,7 +93,7 @@ $('pdfinput').addEventListener('change',()=>{
  const f=$('pdfinput').files&&$('pdfinput').files[0];if(priorUrl)URL.revokeObjectURL(priorUrl);
  if(!f){$('pdfview').classList.add('hidden');$('pdfopen').classList.add('hidden');$('pdfstatus').textContent='Nenhum documento selecionado.';return}
  if(!(f.type==='application/pdf'||/\.pdf$/i.test(f.name))){$('pdfstatus').textContent='Seleciona um ficheiro PDF válido.';return}
- priorUrl=URL.createObjectURL(f);$('pdfview').src=priorUrl;$('pdfview').classList.remove('hidden');$('pdfopen').href=priorUrl;$('pdfopen').classList.remove('hidden');$('pdfstatus').textContent='Documento aberto: '+f.name;
+ priorUrl=URL.createObjectURL(f);const pdfUrl=priorUrl+(validPage?'#page='+linkedPage:'');$('pdfview').src=pdfUrl;$('pdfview').classList.remove('hidden');$('pdfopen').href=pdfUrl;$('pdfopen').classList.remove('hidden');$('pdfstatus').textContent='Documento aberto: '+f.name+(validPage?' — a tentar mostrar a página '+linkedPage:'');
 });
 })();
 </script></body></html>
