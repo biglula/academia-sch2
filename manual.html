@@ -46,7 +46,7 @@ button,.primary{background:#ff7854;border:0;color:#101d2d;font-weight:750;cursor
 <p class="muted">No iPhone, se o visualizador interno não mostrar a página correta, toca em «Abrir PDF na página indicada». O posicionamento depende do leitor PDF do dispositivo.</p>
 </div>
 </section>
-<p class="muted">Os manuais de Veículos e Material Hidráulico estão ligados a PDFs oficiais, com cópia prevista no site. Para os restantes cadernos ainda não há PDF alojado nesta página; enquanto isso, pode selecionar o ficheiro localmente, sem o enviar.</p>
+<p class="muted">O leitor procura primeiro os PDFs na pasta «manuais» do site. Se ainda não estiverem publicados, permite selecionar um ficheiro local; para veículos e material hidráulico, existe também ligação ao PDF publicado oficialmente pela Câmara Municipal de Lisboa.</p>
 <script>
 (()=>{
 'use strict';
@@ -54,7 +54,7 @@ const $=id=>document.getElementById(id);
 const names={veiculos:'Combate a Incêndios em Veículos',ventilacao:'Ventilação Operacional',rurais:'Incêndios Rurais e Florestais',combate:'Incêndios Urbanos',sgo:'Sistema de Gestão de Operações',hidraulico:'Material Hidráulico',relatorios:'Elaboração de Relatórios'};
 const params=new URLSearchParams(location.search);const requested=params.get('topic');const startPage=Number(params.get('page'));let page=Number.isInteger(startPage)&&startPage>0?startPage:1;let url=null;let db=null;
 const database='academia-sch2-manuais',store='pdf';
-const hosted={veiculos:'manuais/veiculos.pdf',hidraulico:'manuais/hidraulico.pdf'};
+const hosted={veiculos:'manuais/veiculos.pdf',ventilacao:'manuais/ventilacao.pdf',rurais:'manuais/rurais.pdf',combate:'manuais/combate.pdf',sgo:'manuais/sgo.pdf',hidraulico:'manuais/hidraulico.pdf',relatorios:'manuais/relatorios.pdf'};
 const official={
 veiculos:'https://www.lisboa.pt/fileadmin/informacao/publicacoes/seguran%C3%A7a_preven%C3%A7%C3%A3o/Manual_de_combate_a_incendios_em_veiculos.pdf',
 hidraulico:'https://www.lisboa.pt/fileadmin/informacao/publicacoes/seguran%C3%A7a_preven%C3%A7%C3%A3o/Manual_de_manobras_material_hidraulico_N9.pdf'};
@@ -71,7 +71,7 @@ async function load(){updateLabel();$('reader').classList.add('hidden');$('file'
 const key=$('manual').value;
 if(hosted[key]){
   try{const response=await fetch(hosted[key],{method:'HEAD',cache:'no-store'});if(response.ok){showHostedPdf(hosted[key]);return}}catch(e){}
-  showHostedPdf(official[key]);setStatus('O PDF está acessível no site oficial do Regimento. A cópia para alojamento local da Academia ainda não foi confirmada.');return;
+  if(official[key]){showHostedPdf(official[key]);setStatus('O PDF está acessível no site oficial do Regimento. A cópia na Academia ainda não está disponível.');return;}
 }
 try{if(!db)db=await openDB();const saved=await tx($('manual').value,false);if(saved&&saved.blob){showPdf(saved.blob);return}if(url){URL.revokeObjectURL(url);url=null}$('setup').classList.remove('hidden');setStatus('Seleciona o PDF para ativar a abertura direta neste dispositivo.')}catch(err){$('setup').classList.remove('hidden');setStatus('Não foi possível aceder ao armazenamento do navegador. Podes abrir o PDF nesta sessão, mas poderá não ficar guardado.',true)}}
 $('file').addEventListener('change',async()=>{const file=$('file').files&&$('file').files[0];if(!file)return;if(file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name)){setStatus('Seleciona um ficheiro PDF válido.',true);return}try{if(!db)db=await openDB();await tx($('manual').value,true,{name:file.name,blob:file,date:Date.now()});setStatus('PDF associado: '+file.name);showPdf(file)}catch(e){showPdf(file);setStatus('PDF aberto, mas não foi possível guardá-lo permanentemente neste navegador.',true)}});
