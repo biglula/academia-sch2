@@ -1,0 +1,30 @@
+name: Disponibilizar manuais oficiais em PDF
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/publicar-manuais-oficiais.yml'
+permissions:
+  contents: write
+jobs:
+  obter-manuais:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Obter PDFs oficiais da Câmara Municipal de Lisboa
+        run: |
+          set -euo pipefail
+          mkdir -p manuais
+          curl -fL --retry 3 --connect-timeout 20 'https://www.lisboa.pt/fileadmin/informacao/publicacoes/seguran%C3%A7a_preven%C3%A7%C3%A3o/Manual_de_combate_a_incendios_em_veiculos.pdf' -o manuais/veiculos.pdf
+          curl -fL --retry 3 --connect-timeout 20 'https://www.lisboa.pt/fileadmin/informacao/publicacoes/seguran%C3%A7a_preven%C3%A7%C3%A3o/Manual_de_manobras_material_hidraulico_N9.pdf' -o manuais/hidraulico.pdf
+          head -c 4 manuais/veiculos.pdf | grep -q '%PDF'
+          head -c 4 manuais/hidraulico.pdf | grep -q '%PDF'
+      - name: Guardar os documentos no site
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add manuais/veiculos.pdf manuais/hidraulico.pdf
+          if ! git diff --cached --quiet; then
+            git commit -m "Disponibilizar PDFs oficiais de veículos e material hidráulico"
+            git push
+          fi
