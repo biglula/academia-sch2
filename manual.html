@@ -1,0 +1,70 @@
+<!doctype html><html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Consultar manual PDF — Academia SCH2</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#ecf2fa;background:#0a1120}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 0 0,#1b304e,#0a1120 57%);min-height:100vh}
+main{max-width:1040px;margin:auto;padding:18px 14px 45px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:28px}
+a{color:#add7ff} .back{padding:10px 15px;border-radius:12px;background:#263a56;color:#fff;text-decoration:none}
+h1{font-size:clamp(25px,5vw,38px);margin:12px 0}p{color:#b4c5d8;line-height:1.55}
+.panel{background:#122039;border:1px solid #334962;border-radius:18px;padding:19px;margin:16px 0}
+.info{background:#0d192c;border-radius:11px;padding:12px;margin:12px 0;line-height:1.55}
+small,.muted{font-size:13px;color:#9eb1ca}label{display:block;margin:12px 0 7px;color:#bfd0e2;font-weight:650}
+select,input,button{font:inherit;border-radius:10px;padding:11px 13px}
+select,input{background:#0b172a;color:#fff;border:1px solid #546780;max-width:100%;width:100%}
+button,.primary{background:#ff7854;border:0;color:#101d2d;font-weight:750;cursor:pointer;text-decoration:none;display:inline-block}
+.primary{padding:12px 16px;border-radius:12px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0}
+#viewer{display:block;background:#fff;width:100%;height:76vh;min-height:440px;border:1px solid #526981;border-radius:12px}
+.hidden{display:none!important}.error{color:#ffb8ab} .ok{color:#9ce3b6}
+@media(max-width:600px){#viewer{height:67vh;min-height:400px}.panel{padding:13px}}
+</style></head><body><main>
+<header><b>🚒 Academia SCH2</b><a href="index.html" class="back">← Voltar ao simulador</a></header>
+<h1>Consultar o manual original</h1>
+<p>Esta página abre o <strong>PDF do caderno pedagógico</strong> na página indicada pela pergunta. Não mostra outras perguntas ou fichas de revisão.</p>
+<section class="panel">
+<div class="info"><b id="subject">Matéria</b><p id="reference" class="muted"></p><b id="pageLabel">Página não identificada</b></div>
+<label for="manual">Manual a consultar</label>
+<select id="manual">
+<option value="veiculos">Combate a Incêndios em Veículos</option>
+<option value="ventilacao">Ventilação Operacional</option>
+<option value="rurais">Combate a Incêndios Rurais e Florestais</option>
+<option value="combate">Combate a Incêndios Urbanos</option>
+<option value="sgo">Sistema de Gestão de Operações (até à p. 22)</option>
+<option value="hidraulico">Manobras — Material Hidráulico (até à p. 94)</option>
+<option value="relatorios">Elaboração de Relatórios e Documentação Técnica</option>
+</select>
+<div id="setup" class="hidden">
+<p>Ainda não tens este manual associado neste dispositivo. Escolhe o PDF uma vez; ficará guardado <strong>localmente neste navegador</strong> para as próximas consultas.</p>
+<label for="file">Selecionar manual em PDF</label>
+<input id="file" type="file" accept=".pdf,application/pdf">
+</div>
+<p id="status" aria-live="polite" class="muted">A verificar manual...</p>
+<div id="reader" class="hidden">
+<div class="actions"><a id="open" class="primary" target="_blank" rel="noopener">📖 Abrir PDF na página indicada</a><button id="replace" type="button">Trocar PDF deste manual</button><button id="prev" type="button">← Página anterior</button><button id="next" type="button">Página seguinte →</button></div>
+<iframe id="viewer" title="Manual PDF na página selecionada"></iframe>
+<p class="muted">No iPhone, se o visualizador interno não mostrar a página correta, toca em «Abrir PDF na página indicada». O posicionamento depende do leitor PDF do dispositivo.</p>
+</div>
+</section>
+<p class="muted">Os manuais não são enviados para o GitHub. Ficam guardados apenas no navegador e dispositivo onde os selecionares. Se limpares os dados do site ou mudares de dispositivo, terás de os selecionar novamente.</p>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const names={veiculos:'Combate a Incêndios em Veículos',ventilacao:'Ventilação Operacional',rurais:'Incêndios Rurais e Florestais',combate:'Incêndios Urbanos',sgo:'Sistema de Gestão de Operações',hidraulico:'Material Hidráulico',relatorios:'Elaboração de Relatórios'};
+const params=new URLSearchParams(location.search);const requested=params.get('topic');const startPage=Number(params.get('page'));let page=Number.isInteger(startPage)&&startPage>0?startPage:1;let url=null;let db=null;
+const database='academia-sch2-manuais',store='pdf';
+const setStatus=(s,fail=false)=>{$('status').textContent=s;$('status').className=fail?'error':'muted'};
+function openDB(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window)){reject(Error('Armazenamento local indisponível'));return}const req=indexedDB.open(database,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(store))req.result.createObjectStore(store)};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+function tx(key,write,data){return new Promise((resolve,reject)=>{const trans=db.transaction(store,write?'readwrite':'readonly');const req=write?trans.objectStore(store).put(data,key):trans.objectStore(store).get(key);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);trans.onerror=()=>reject(trans.error)})}
+function physicalPage(){return page+($('manual').value==='hidraulico'?1:0)}
+function updateLabel(){$('subject').textContent=names[$('manual').value]||'Manual';$('reference').textContent=params.get('source')||'';$('pageLabel').textContent='Página de referência: '+page+( $('manual').value==='hidraulico'?' (página '+physicalPage()+' do ficheiro PDF)':'')}
+function showPdf(blob){if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(blob);$('reader').classList.remove('hidden');$('setup').classList.add('hidden');goPage();setStatus('Manual disponível neste dispositivo.')}
+function goPage(){updateLabel();if(!url)return;const target=url+'#page='+physicalPage();$('viewer').src=target;$('open').href=target}
+async function load(){updateLabel();$('reader').classList.add('hidden');$('file').value='';try{if(!db)db=await openDB();const saved=await tx($('manual').value,false);if(saved&&saved.blob){showPdf(saved.blob);return}if(url){URL.revokeObjectURL(url);url=null}$('setup').classList.remove('hidden');setStatus('Seleciona o PDF para ativar a abertura direta neste dispositivo.')}catch(err){$('setup').classList.remove('hidden');setStatus('Não foi possível aceder ao armazenamento do navegador. Podes abrir o PDF nesta sessão, mas poderá não ficar guardado.',true)}}
+$('file').addEventListener('change',async()=>{const file=$('file').files&&$('file').files[0];if(!file)return;if(file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name)){setStatus('Seleciona um ficheiro PDF válido.',true);return}try{if(!db)db=await openDB();await tx($('manual').value,true,{name:file.name,blob:file,date:Date.now()});setStatus('PDF associado: '+file.name);showPdf(file)}catch(e){showPdf(file);setStatus('PDF aberto, mas não foi possível guardá-lo permanentemente neste navegador.',true)}});
+$('manual').addEventListener('change',()=>{page=1;load()});$('replace').addEventListener('click',()=>{$('setup').classList.remove('hidden');$('file').value='';$('file').focus()});
+$('prev').addEventListener('click',()=>{page=Math.max(1,page-1);goPage()});$('next').addEventListener('click',()=>{page++;goPage()});
+if(requested&&names[requested])$('manual').value=requested;load();
+})();
+</script></main></body></html>
