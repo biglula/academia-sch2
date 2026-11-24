@@ -46,7 +46,7 @@ button,.primary{background:#ff7854;border:0;color:#101d2d;font-weight:750;cursor
 <p class="muted">No iPhone, se o visualizador interno não mostrar a página correta, toca em «Abrir PDF na página indicada». O posicionamento depende do leitor PDF do dispositivo.</p>
 </div>
 </section>
-<p class="muted">Os manuais não são enviados para o GitHub. Ficam guardados apenas no navegador e dispositivo onde os selecionares. Se limpares os dados do site ou mudares de dispositivo, terás de os selecionar novamente.</p>
+<p class="muted">Os manuais de Veículos e Material Hidráulico estão ligados a PDFs oficiais, com cópia prevista no site. Para os restantes cadernos ainda não há PDF alojado nesta página; enquanto isso, pode selecionar o ficheiro localmente, sem o enviar.</p>
 <script>
 (()=>{
 'use strict';
@@ -54,14 +54,26 @@ const $=id=>document.getElementById(id);
 const names={veiculos:'Combate a Incêndios em Veículos',ventilacao:'Ventilação Operacional',rurais:'Incêndios Rurais e Florestais',combate:'Incêndios Urbanos',sgo:'Sistema de Gestão de Operações',hidraulico:'Material Hidráulico',relatorios:'Elaboração de Relatórios'};
 const params=new URLSearchParams(location.search);const requested=params.get('topic');const startPage=Number(params.get('page'));let page=Number.isInteger(startPage)&&startPage>0?startPage:1;let url=null;let db=null;
 const database='academia-sch2-manuais',store='pdf';
+const hosted={veiculos:'manuais/veiculos.pdf',hidraulico:'manuais/hidraulico.pdf'};
+const official={
+veiculos:'https://www.lisboa.pt/fileadmin/informacao/publicacoes/seguran%C3%A7a_preven%C3%A7%C3%A3o/Manual_de_combate_a_incendios_em_veiculos.pdf',
+hidraulico:'https://www.lisboa.pt/fileadmin/informacao/publicacoes/seguran%C3%A7a_preven%C3%A7%C3%A3o/Manual_de_manobras_material_hidraulico_N9.pdf'};
+
 const setStatus=(s,fail=false)=>{$('status').textContent=s;$('status').className=fail?'error':'muted'};
 function openDB(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window)){reject(Error('Armazenamento local indisponível'));return}const req=indexedDB.open(database,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(store))req.result.createObjectStore(store)};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
 function tx(key,write,data){return new Promise((resolve,reject)=>{const trans=db.transaction(store,write?'readwrite':'readonly');const req=write?trans.objectStore(store).put(data,key):trans.objectStore(store).get(key);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);trans.onerror=()=>reject(trans.error)})}
-function physicalPage(){return page+($('manual').value==='hidraulico'?1:0)}
-function updateLabel(){$('subject').textContent=names[$('manual').value]||'Manual';$('reference').textContent=params.get('source')||'';$('pageLabel').textContent='Página de referência: '+page+( $('manual').value==='hidraulico'?' (página '+physicalPage()+' do ficheiro PDF)':'')}
-function showPdf(blob){if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(blob);$('reader').classList.remove('hidden');$('setup').classList.add('hidden');goPage();setStatus('Manual disponível neste dispositivo.')}
+function physicalPage(){return page+($('manual').value==='hidraulico'?1:$('manual').value==='veiculos'?2:0)}
+function updateLabel(){$('subject').textContent=names[$('manual').value]||'Manual';$('reference').textContent=params.get('source')||'';$('pageLabel').textContent='Página de referência: '+page+( $('manual').value==='hidraulico'||$('manual').value==='veiculos'?' (página '+physicalPage()+' do ficheiro PDF)':'')}
+function showHostedPdf(address){if(url&&url.startsWith('blob:'))URL.revokeObjectURL(url);url=address;$('reader').classList.remove('hidden');$('setup').classList.add('hidden');$('replace').classList.add('hidden');goPage();setStatus('Manual disponível online. Não precisas de selecionar o ficheiro neste dispositivo.')}
+function showPdf(blob){$('replace').classList.remove('hidden');if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(blob);$('reader').classList.remove('hidden');$('setup').classList.add('hidden');goPage();setStatus('Manual disponível neste dispositivo.')}
 function goPage(){updateLabel();if(!url)return;const target=url+'#page='+physicalPage();$('viewer').src=target;$('open').href=target}
-async function load(){updateLabel();$('reader').classList.add('hidden');$('file').value='';try{if(!db)db=await openDB();const saved=await tx($('manual').value,false);if(saved&&saved.blob){showPdf(saved.blob);return}if(url){URL.revokeObjectURL(url);url=null}$('setup').classList.remove('hidden');setStatus('Seleciona o PDF para ativar a abertura direta neste dispositivo.')}catch(err){$('setup').classList.remove('hidden');setStatus('Não foi possível aceder ao armazenamento do navegador. Podes abrir o PDF nesta sessão, mas poderá não ficar guardado.',true)}}
+async function load(){updateLabel();$('reader').classList.add('hidden');$('file').value='';
+const key=$('manual').value;
+if(hosted[key]){
+  try{const response=await fetch(hosted[key],{method:'HEAD',cache:'no-store'});if(response.ok){showHostedPdf(hosted[key]);return}}catch(e){}
+  showHostedPdf(official[key]);setStatus('O PDF está acessível no site oficial do Regimento. A cópia para alojamento local da Academia ainda não foi confirmada.');return;
+}
+try{if(!db)db=await openDB();const saved=await tx($('manual').value,false);if(saved&&saved.blob){showPdf(saved.blob);return}if(url){URL.revokeObjectURL(url);url=null}$('setup').classList.remove('hidden');setStatus('Seleciona o PDF para ativar a abertura direta neste dispositivo.')}catch(err){$('setup').classList.remove('hidden');setStatus('Não foi possível aceder ao armazenamento do navegador. Podes abrir o PDF nesta sessão, mas poderá não ficar guardado.',true)}}
 $('file').addEventListener('change',async()=>{const file=$('file').files&&$('file').files[0];if(!file)return;if(file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name)){setStatus('Seleciona um ficheiro PDF válido.',true);return}try{if(!db)db=await openDB();await tx($('manual').value,true,{name:file.name,blob:file,date:Date.now()});setStatus('PDF associado: '+file.name);showPdf(file)}catch(e){showPdf(file);setStatus('PDF aberto, mas não foi possível guardá-lo permanentemente neste navegador.',true)}});
 $('manual').addEventListener('change',()=>{page=1;load()});$('replace').addEventListener('click',()=>{$('setup').classList.remove('hidden');$('file').value='';$('file').focus()});
 $('prev').addEventListener('click',()=>{page=Math.max(1,page-1);goPage()});$('next').addEventListener('click',()=>{page++;goPage()});
